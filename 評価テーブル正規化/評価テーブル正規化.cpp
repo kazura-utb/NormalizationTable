@@ -6,33 +6,31 @@
 #include "stdlib.h"
 #include "time.h"
 #include "math.h"
+#include "fio.h"
 
 #define LEN 32
 #define PATTERN_NUM 11
 #define INDEX_NUM 6561
-#define MOBILITY_NUM 1
+#define MOBILITY_NUM 36
 #define POT_MOBILITY_NUM 60
 #define PARITY_NUM 16
+#define STAGE_NUM 61
 
-double hori_ver1[INDEX_NUM];
-double hori_ver2[INDEX_NUM];
-double hori_ver3[INDEX_NUM];
-double dia_ver1[INDEX_NUM];
-double dia_ver2[INDEX_NUM / 3];
-double dia_ver3[INDEX_NUM / 9];
-double dia_ver4[INDEX_NUM / 27];
-//double dia_ver5[INDEX_NUM / 81];
-double edge[INDEX_NUM * 9];
-double corner5_2[INDEX_NUM * 9];
-double corner3_3[INDEX_NUM * 3];
-double triangle[INDEX_NUM * 9];
-double mobility[MOBILITY_NUM];
-double parity[PARITY_NUM];
-//double constant;
-
-//double mobility[MOBILITY_NUM];
-//double pot_mobility[POT_MOBILITY_NUM];
-//double pality[PALITY_NUM];
+INT32 hori_ver1[3][INDEX_NUM];
+INT32 hori_ver2[3][INDEX_NUM];
+INT32 hori_ver3[3][INDEX_NUM];
+INT32 dia_ver1[3][INDEX_NUM];
+INT32 dia_ver2[3][INDEX_NUM / 3];
+INT32 dia_ver3[3][INDEX_NUM / 9];
+INT32 dia_ver4[3][INDEX_NUM / 27];
+//INT32 dia_ver5[INDEX_NUM / 81];
+INT32 edge[3][INDEX_NUM * 9];
+INT32 corner5_2[3][INDEX_NUM * 9];
+INT32 corner3_3[3][INDEX_NUM * 3];
+INT32 triangle[3][INDEX_NUM * 9];
+INT32 mobility[MOBILITY_NUM];
+INT32 parity[PARITY_NUM];
+INT32 constant;
 
 /* 出現頻度記録用 */
 //int key_count_hori1[INDEX_NUM];
@@ -47,7 +45,12 @@ double parity[PARITY_NUM];
 //int key_count_triangle[INDEX_NUM * 9];
 //int key_count_pality[PALITY_NUM];
 
-void Eval_Write(char *filename)
+
+
+
+
+
+void Eval_Write(char *filename, int stage)
 {
 	FILE *fp;
 
@@ -58,127 +61,128 @@ void Eval_Write(char *filename)
 	int i;
 	for (i = 0; i < 6561; i++)
 	{
-		if (hori_ver1[i] == 0)
+		if (hori_ver1[stage][i] == 0)
 		{
 			fprintf(fp, "0\n");
 		}
 		else
 		{
-			fprintf(fp, "%lf\n", hori_ver1[i]);
+			fprintf(fp, "%d\n", hori_ver1[stage][i]);
 		}
 	}
 	for (i = 0; i < 6561; i++)
 	{
-		if (hori_ver2[i] == 0)
+		if (hori_ver2[stage][i] == 0)
 		{
 			fprintf(fp, "0\n");
 		}
 		else
 		{
-			fprintf(fp, "%lf\n", hori_ver2[i]);
+			fprintf(fp, "%d\n", hori_ver2[stage][i]);
 		}
 	}
 	for (i = 0; i < 6561; i++)
 	{
-		if (hori_ver3[i] == 0)
+		if (hori_ver3[stage][i] == 0)
 		{
 			fprintf(fp, "0\n");
 		}
 		else
 		{
-			fprintf(fp, "%lf\n", hori_ver3[i]);
+			fprintf(fp, "%d\n", hori_ver3[stage][i]);
 		}
 	}
 	for (i = 0; i < 6561; i++)
 	{
-		if (dia_ver1[i] == 0)
+		if (dia_ver1[stage][i] == 0)
 		{
 			fprintf(fp, "0\n");
 		}
 		else
 		{
-			fprintf(fp, "%lf\n", dia_ver1[i]);
+			fprintf(fp, "%d\n", dia_ver1[stage][i]);
 		}
 	}
 	for (i = 0; i < 2187; i++)
 	{
-		if (dia_ver2[i] == 0)
+		if (dia_ver2[stage][i] == 0)
 		{
 			fprintf(fp, "0\n");
 		}
 		else
 		{
-			fprintf(fp, "%lf\n", dia_ver2[i]);
+			fprintf(fp, "%d\n", dia_ver2[stage][i]);
 		}
 	}
 	for (i = 0; i < 729; i++)
 	{
-		if (dia_ver3[i] == 0)
+		if (dia_ver3[stage][i] == 0)
 		{
 			fprintf(fp, "0\n");
 		}
 		else
 		{
-			fprintf(fp, "%lf\n", dia_ver3[i]);
+			fprintf(fp, "%d\n", dia_ver3[stage][i]);
 		}
 	}
 	for (i = 0; i < 243; i++)
 	{
-		if (dia_ver4[i] == 0)
+		if (dia_ver4[stage][i] == 0)
 		{
 			fprintf(fp, "0\n");
 		}
 		else
 		{
-			fprintf(fp, "%lf\n", dia_ver4[i]);
+			fprintf(fp, "%d\n", dia_ver4[stage][i]);
 		}
 	}
 
 	for (i = 0; i < 59049; i++)
 	{
-		if (edge[i] == 0)
+		if (edge[stage][i] == 0)
 		{
 			fprintf(fp, "0\n");
 		}
 		else
 		{
-			fprintf(fp, "%lf\n", edge[i]);
+			fprintf(fp, "%d\n", edge[stage][i]);
 		}
 	}
 
 	for (i = 0; i < 59049; i++)
 	{
-		if (corner5_2[i] == 0)
+		if (corner5_2[stage][i] == 0)
 		{
 			fprintf(fp, "0\n");
 		}
 		else
 		{
-			fprintf(fp, "%lf\n", corner5_2[i]);
+			fprintf(fp, "%d\n", corner5_2[stage][i]);
 		}
 	}
 	for (i = 0; i < 19683; i++)
 	{
-		if (corner3_3[i] == 0)
+		if (corner3_3[stage][i] == 0)
 		{
 			fprintf(fp, "0\n");
 		}
 		else
 		{
-			fprintf(fp, "%lf\n", corner3_3[i]);
+			fprintf(fp, "%d\n", corner3_3[stage][i]);
 		}
 	}
 	for (i = 0; i < 59049; i++)
 	{
-		if (triangle[i] == 0)
+		if (triangle[stage][i] == 0)
 		{
 			fprintf(fp, "0\n");
 		}
 		else
 		{
-			fprintf(fp, "%lf\n", triangle[i]);
+			fprintf(fp, "%d\n", triangle[stage][i]);
 		}
 	}
+
 #if 0
 	for (i = 0; i < MOBILITY_NUM; i++)
 	{
@@ -188,10 +192,9 @@ void Eval_Write(char *filename)
 		}
 		else
 		{
-			fprintf(fp, "%lf\n", mobility[i]);
+			fprintf(fp, "%d\n", mobility[i]);
 		}
 	}
-#endif
 	for (i = 0; i < PARITY_NUM; i++)
 	{
 		if (parity[i] == 0)
@@ -200,17 +203,17 @@ void Eval_Write(char *filename)
 		}
 		else
 		{
-			fprintf(fp, "%lf\n", parity[i]);
+			fprintf(fp, "%d\n", (int)(parity[i] * 10000.0));
 		}
 	}
-
-	//fprintf(fp, "%lf\n", constant);
+#endif
+	fprintf(fp, "%d\n", constant);
 
 	fclose(fp);
 }
 
 /* 正規化する評価テーブルを読み込む */
-int read_table(char *filename)
+int read_table(char *filename, int stage)
 {
 	FILE *fp;
 	char str[32];
@@ -228,75 +231,81 @@ int read_table(char *filename)
 	for (i = 0; i < 6561; i++)
 	{
 		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%lf", &hori_ver1[i]);
+		sscanf_s(buf, "%d", &hori_ver1[stage][i]);
 	}
 	for (i = 0; i < 6561; i++)
 	{
 		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%lf", &hori_ver2[i]);
+		sscanf_s(buf, "%d", &hori_ver2[stage][i]);
 	}
 	for (i = 0; i < 6561; i++)
 	{
 		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%lf", &hori_ver3[i]);
+		sscanf_s(buf, "%d", &hori_ver3[stage][i]);
 	}
 	for (i = 0; i < 6561; i++)
 	{
 		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%lf", &dia_ver1[i]);
+		sscanf_s(buf, "%d", &dia_ver1[stage][i]);
 	}
 	for (i = 0; i < 2187; i++)
 	{
 		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%lf", &dia_ver2[i]);
+		sscanf_s(buf, "%d", &dia_ver2[stage][i]);
 	}
 	for (i = 0; i < 729; i++)
 	{
 		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%lf", &dia_ver3[i]);
+		sscanf_s(buf, "%d", &dia_ver3[stage][i]);
 	}
 	for (i = 0; i < 243; i++)
 	{
 		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%lf", &dia_ver4[i]);
+		sscanf_s(buf, "%d", &dia_ver4[stage][i]);
 	}
 
 	for (i = 0; i < 59049; i++)
 	{
 		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%lf", &edge[i]);
+		sscanf_s(buf, "%d", &edge[stage][i]);
 	}
 
 	for (i = 0; i < 59049; i++)
 	{
 		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%lf", &corner5_2[i]);
+		sscanf_s(buf, "%d", &corner5_2[stage][i]);
 	}
 	for (i = 0; i < 19683; i++)
 	{
 		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%lf", &corner3_3[i]);
+		sscanf_s(buf, "%d", &corner3_3[stage][i]);
 	}
 	for (i = 0; i < 59049; i++)
 	{
 		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%lf", &triangle[i]);
+		sscanf_s(buf, "%d", &triangle[stage][i]);
 	}
 #if 0
 	for (i = 0; i < MOBILITY_NUM; i++)
 	{
 		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%lf", &mobility[i]);
+		sscanf_s(buf, "%d", &mobility[i]);
 	}
-#endif
+
 	for (i = 0; i < PARITY_NUM; i++)
 	{
 		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%lf", &parity[i]);
+		sscanf_s(buf, "%d", &parity[i]);
 	}
+#endif
 
-	/*fgets(buf, LEN, fp);
-	sscanf_s(buf, "%lf", &constant);*/
+	fgets(buf, LEN, fp);
+	sscanf_s(buf, "%d", &constant);
+
+	if (fgets(buf, LEN, fp) != NULL)
+	{
+		printf("DATA ERROR!!!\n");
+	}
 
 	fclose(fp);
 
@@ -354,14 +363,15 @@ int convert_index_rev(int index_num)
 int _tmain(int argc, _TCHAR* argv[])
 {
 	int COUNT = 0;
+	int COUNT_SMG = 0;
 
 	char filename[32];
 
-	for (int count = 0; count < 60; count++){
+	for (int count = 0; count < STAGE_NUM; count++){
 
-		sprintf_s(filename, "%d.dat", count);
+		sprintf_s(filename, "table\\%d.dat", count);
 
-		if (read_table(filename) == -1)
+		if (read_table(filename, 1) == -1)
 		{
 			printf("読み込みに失敗しました。\n");
 			continue;
@@ -396,7 +406,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			if (j > i)
 			{
 				/* 値が大きい方に正規化 */
-				hori_ver1[j] = hori_ver1[i];
+				hori_ver1[1][j] = hori_ver1[1][i];
 				COUNT++;
 			}
 		}
@@ -410,7 +420,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			if (j > i)
 			{
 				/* 値が大きい方に正規化 */
-				hori_ver2[j] = hori_ver2[i];
+				hori_ver2[1][j] = hori_ver2[1][i];
 				COUNT++;
 			}
 		}
@@ -424,7 +434,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			if (j > i)
 			{
 				/* 値が大きい方に正規化 */
-				hori_ver3[j] = hori_ver3[i];
+				hori_ver3[1][j] = hori_ver3[1][i];
 				COUNT++;
 			}
 		}
@@ -438,7 +448,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			if (j > i)
 			{
 				/* 値が大きい方に正規化 */
-				dia_ver1[j] = dia_ver1[i];
+				dia_ver1[1][j] = dia_ver1[1][i];
 				COUNT++;
 			}
 		}
@@ -453,7 +463,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			if (j > i)
 			{
 				/* 値が大きい方に正規化 */
-				dia_ver2[j] = dia_ver2[i];
+				dia_ver2[1][j] = dia_ver2[1][i];
 				COUNT++;
 			}
 		}
@@ -468,7 +478,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			if (j > i)
 			{
 				/* 値が大きい方に正規化 */
-				dia_ver3[j] = dia_ver3[i];
+				dia_ver3[1][j] = dia_ver3[1][i];
 				COUNT++;
 			}
 		}
@@ -483,7 +493,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			if (j > i)
 			{
 				/* 値が大きい方に正規化 */
-				dia_ver4[j] = dia_ver4[i];
+				dia_ver4[1][j] = dia_ver4[1][i];
 				COUNT++;
 			}
 		}
@@ -514,7 +524,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			if (j > i)
 			{
 				/* 値が大きい方に正規化 */
-				edge[j] = edge[i];
+				edge[1][j] = edge[1][i];
 				COUNT++;
 			}
 		}
@@ -550,7 +560,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 #endif
 		/* corner3_3 */
-		table_num = index_num_table[10];
+		table_num = index_num_table[9];
 		int corner3_3_convert_table[9] = { 0, 3, 6, 1, 4, 7, 2, 5, 8 };
 		for (i = 0; i < table_num; i++)
 		{
@@ -559,11 +569,12 @@ int _tmain(int argc, _TCHAR* argv[])
 			if (j > i)
 			{
 				/* 値が大きい方に正規化 */
-				corner3_3[j] = corner3_3[i];
+				corner3_3[1][j] = corner3_3[1][i];
 				COUNT++;
 			}
 		}
 
+		/* triangle3_3 */
 		table_num = index_num_table[10];
 		int triangle_convert_table[10] = { 0, 4, 7, 9, 1, 5, 8, 2, 6, 3 };
 		for (i = 0; i < table_num; i++)
@@ -572,18 +583,277 @@ int _tmain(int argc, _TCHAR* argv[])
 			if (j > i)
 			{
 				/* 値が大きい方に正規化 */
-				triangle[j] = triangle[i];
+				triangle[1][j] = triangle[1][i];
 				COUNT++;
 			}
 		}
 
+#if 0
+		parity[2] = parity[1];
+		parity[4] = parity[1];
+		parity[8] = parity[1];
+
+		parity[5] = parity[3];
+		parity[6] = parity[3];
+		parity[9] = parity[3];
+		parity[10] = parity[3];
+		parity[12] = parity[3];
+
+		parity[11] = parity[7];
+		parity[13] = parity[7];
+		parity[14] = parity[7];
+		
+		/* 前のステージによるスムージング */
+		sprintf_s(filename, "%d.dat", count - 1);
+		if (count - 1 >= 0)
+		{
+			if (read_table(filename, 0) == -1) continue;
+			printf("正規化します...(前のスムージング)\n");
+
+			/* horizon ver.1 */
+			table_num = index_num_table[0];
+			for (i = 0; i < table_num; i++)
+			{
+				if (hori_ver1[1][i] == 0 && hori_ver1[0][i] != 0)
+				{
+					hori_ver1[1][i] = hori_ver1[0][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* horizon ver.2 */
+			table_num = index_num_table[1];
+			for (i = 0; i < table_num; i++)
+			{
+				if (hori_ver2[1][i] == 0 && hori_ver2[0][i] != 0)
+				{
+					hori_ver2[1][i] = hori_ver2[0][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* horizon ver.3 */
+			table_num = index_num_table[2];
+			for (i = 0; i < table_num; i++)
+			{
+				if (hori_ver3[1][i] == 0 && hori_ver3[0][i] != 0)
+				{
+					hori_ver3[1][i] = hori_ver3[0][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* diagram ver.1 */
+			table_num = index_num_table[3];
+			for (i = 0; i < table_num; i++)
+			{
+				if (dia_ver1[1][i] == 0 && dia_ver1[0][i] != 0)
+				{
+					dia_ver1[1][i] = dia_ver1[0][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* diagram ver.2 */
+			table_num = index_num_table[4];
+			for (i = 0; i < table_num; i++)
+			{
+				if (dia_ver2[1][i] == 0 && dia_ver2[0][i] != 0)
+				{
+					dia_ver2[1][i] = dia_ver2[0][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* diagram ver.3 */
+			table_num = index_num_table[5];
+			for (i = 0; i < table_num; i++)
+			{
+				if (dia_ver3[1][i] == 0 && dia_ver3[0][i] != 0)
+				{
+					dia_ver3[1][i] = dia_ver3[0][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* diagram ver.4 */
+			table_num = index_num_table[6];
+			for (i = 0; i < table_num; i++)
+			{
+				if (dia_ver4[1][i] == 0 && dia_ver4[0][i] != 0)
+				{
+					dia_ver4[1][i] = dia_ver4[0][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* edge */
+			table_num = index_num_table[7];
+			for (i = 0; i < table_num; i++)
+			{
+				if (edge[1][i] == 0 && edge[0][i] != 0)
+				{
+					edge[1][i] = edge[0][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* corner3_3 */
+			table_num = index_num_table[9];
+			for (i = 0; i < table_num; i++)
+			{
+				if (corner3_3[1][i] == 0 && corner3_3[0][i] != 0)
+				{
+					corner3_3[1][i] = corner3_3[0][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* triangle3_3 */
+			table_num = index_num_table[10];
+			for (i = 0; i < table_num; i++)
+			{
+				if (triangle[1][i] == 0 && triangle[0][i] != 0)
+				{
+					triangle[1][i] = triangle[0][i];
+					COUNT_SMG++;
+				}
+			}
+		}
+
+
+		/* 後ろのステージによるスムージング */
+		sprintf_s(filename, "%d.dat", count + 1);
+		if (count + 1 < 60)
+		{
+			if (read_table(filename, 2) == -1) continue;
+			printf("正規化します...(後ろのスムージング)\n");
+
+			/* horizon ver.1 */
+			table_num = index_num_table[0];
+			for (i = 0; i < table_num; i++)
+			{
+				if (hori_ver1[1][i] == 0 && hori_ver1[2][i] != 0)
+				{
+					hori_ver1[1][i] = hori_ver1[2][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* horizon ver.2 */
+			table_num = index_num_table[1];
+			for (i = 0; i < table_num; i++)
+			{
+				if (hori_ver2[1][i] == 0 && hori_ver2[2][i] != 0)
+				{
+					hori_ver2[1][i] = hori_ver2[2][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* horizon ver.3 */
+			table_num = index_num_table[2];
+			for (i = 0; i < table_num; i++)
+			{
+				if (hori_ver3[1][i] == 0 && hori_ver3[2][i] != 0)
+				{
+					hori_ver3[1][i] = hori_ver3[2][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* diagram ver.1 */
+			table_num = index_num_table[3];
+			for (i = 0; i < table_num; i++)
+			{
+				if (dia_ver1[1][i] == 0 && dia_ver1[2][i] != 0)
+				{
+					dia_ver1[1][i] = dia_ver1[2][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* diagram ver.2 */
+			table_num = index_num_table[4];
+			for (i = 0; i < table_num; i++)
+			{
+				if (dia_ver2[1][i] == 0 && dia_ver2[2][i] != 0)
+				{
+					dia_ver2[1][i] = dia_ver2[2][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* diagram ver.3 */
+			table_num = index_num_table[5];
+			for (i = 0; i < table_num; i++)
+			{
+				if (dia_ver3[1][i] == 0 && dia_ver3[2][i] != 0)
+				{
+					dia_ver3[1][i] = dia_ver3[2][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* diagram ver.4 */
+			table_num = index_num_table[6];
+			for (i = 0; i < table_num; i++)
+			{
+				if (dia_ver4[1][i] == 0 && dia_ver4[2][i] != 0)
+				{
+					dia_ver4[1][i] = dia_ver4[2][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* edge */
+			table_num = index_num_table[7];
+			for (i = 0; i < table_num; i++)
+			{
+				if (edge[1][i] == 0 && edge[2][i] != 0)
+				{
+					edge[1][i] = edge[2][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* corner3_3 */
+			table_num = index_num_table[9];
+			for (i = 0; i < table_num; i++)
+			{
+				if (corner3_3[1][i] == 0 && corner3_3[2][i] != 0)
+				{
+					corner3_3[1][i] = corner3_3[2][i];
+					COUNT_SMG++;
+				}
+			}
+
+			/* triangle3_3 */
+			table_num = index_num_table[10];
+			for (i = 0; i < table_num; i++)
+			{
+				if (triangle[1][i] == 0 && triangle[2][i] != 0)
+				{
+					triangle[1][i] = triangle[2][i];
+					COUNT_SMG++;
+				}
+			}
+		}
+#endif
 		end_t = clock();
 
-		Eval_Write(filename);
+		sprintf_s(filename, "table\\new\\%d.dat", count);
+		Eval_Write(filename, 1);
 
 		printf("\n正規化を完了しました！\n");
-		printf("正規化した総パターン数 %d個, かかった時間 %.3f秒\n", COUNT, (double)(end_t - start_t) / CLOCKS_PER_SEC);
+		printf("正規化した総パターン数 %d個, スムージングした総パターン数 %d個, かかった時間 %.3f秒\n", COUNT, COUNT_SMG, (double)(end_t - start_t) / CLOCKS_PER_SEC);
+
 	}
+
+	printf("\n評価テーブルを作成しています...\n");
+	makeData();
+	printf("\n評価テーブルを作成しました！\n");
+
 	return 0;
 }
 
