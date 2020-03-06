@@ -1,7 +1,6 @@
 // 評価テーブル正規化.cpp : コンソール アプリケーションのエントリ ポイントを定義します。
 //
 
-#include "stdafx.h"
 #include "string.h"
 #include "stdlib.h"
 #include "time.h"
@@ -16,21 +15,21 @@
 #define PARITY_NUM 16
 #define STAGE_NUM 61
 
-INT32 hori_ver1[3][INDEX_NUM];
-INT32 hori_ver2[3][INDEX_NUM];
-INT32 hori_ver3[3][INDEX_NUM];
-INT32 dia_ver1[3][INDEX_NUM];
-INT32 dia_ver2[3][INDEX_NUM / 3];
-INT32 dia_ver3[3][INDEX_NUM / 9];
-INT32 dia_ver4[3][INDEX_NUM / 27];
-//INT32 dia_ver5[INDEX_NUM / 81];
-INT32 edge[3][INDEX_NUM * 9];
-INT32 corner5_2[3][INDEX_NUM * 9];
-INT32 corner3_3[3][INDEX_NUM * 3];
-INT32 triangle[3][INDEX_NUM * 9];
-INT32 mobility[MOBILITY_NUM];
-INT32 parity[PARITY_NUM];
-INT32 constant;
+INT16 hori_ver1[3][INDEX_NUM];
+INT16 hori_ver2[3][INDEX_NUM];
+INT16 hori_ver3[3][INDEX_NUM];
+INT16 dia_ver1[3][INDEX_NUM];
+INT16 dia_ver2[3][INDEX_NUM / 3];
+INT16 dia_ver3[3][INDEX_NUM / 9];
+INT16 dia_ver4[3][INDEX_NUM / 27];
+//INT16 dia_ver5[INDEX_NUM / 81];
+INT16 edge[3][INDEX_NUM * 9];
+INT16 corner5_2[3][INDEX_NUM * 9];
+INT16 corner3_3[3][INDEX_NUM * 3];
+INT16 triangle[3][INDEX_NUM * 9];
+INT16 mobility[MOBILITY_NUM];
+INT16 parity[PARITY_NUM];
+INT16 constant;
 
 /* 出現頻度記録用 */
 //int key_count_hori1[INDEX_NUM];
@@ -45,142 +44,60 @@ INT32 constant;
 //int key_count_triangle[INDEX_NUM * 9];
 //int key_count_pality[PALITY_NUM];
 
-
-
-
-
-
 void Eval_Write(char *filename, int stage)
 {
 	FILE *fp;
 
-	if (fopen_s(&fp, filename, "w") != 0){
+	if (fopen_s(&fp, filename, "wb") != 0){
 		return;
 	}
 
 	int i;
 	for (i = 0; i < 6561; i++)
 	{
-		if (hori_ver1[stage][i] == 0)
-		{
-			fprintf(fp, "0\n");
-		}
-		else
-		{
-			fprintf(fp, "%d\n", hori_ver1[stage][i]);
-		}
+		fwrite(&hori_ver1[stage][i], sizeof(UINT16), 1, fp);
 	}
 	for (i = 0; i < 6561; i++)
 	{
-		if (hori_ver2[stage][i] == 0)
-		{
-			fprintf(fp, "0\n");
-		}
-		else
-		{
-			fprintf(fp, "%d\n", hori_ver2[stage][i]);
-		}
+		fwrite(&hori_ver2[stage][i], sizeof(UINT16), 1, fp);
 	}
 	for (i = 0; i < 6561; i++)
 	{
-		if (hori_ver3[stage][i] == 0)
-		{
-			fprintf(fp, "0\n");
-		}
-		else
-		{
-			fprintf(fp, "%d\n", hori_ver3[stage][i]);
-		}
+		fwrite(&hori_ver3[stage][i], sizeof(UINT16), 1, fp);
 	}
 	for (i = 0; i < 6561; i++)
 	{
-		if (dia_ver1[stage][i] == 0)
-		{
-			fprintf(fp, "0\n");
-		}
-		else
-		{
-			fprintf(fp, "%d\n", dia_ver1[stage][i]);
-		}
+		fwrite(&dia_ver1[stage][i], sizeof(UINT16), 1, fp);
 	}
 	for (i = 0; i < 2187; i++)
 	{
-		if (dia_ver2[stage][i] == 0)
-		{
-			fprintf(fp, "0\n");
-		}
-		else
-		{
-			fprintf(fp, "%d\n", dia_ver2[stage][i]);
-		}
+		fwrite(&dia_ver2[stage][i], sizeof(UINT16), 1, fp);
 	}
 	for (i = 0; i < 729; i++)
 	{
-		if (dia_ver3[stage][i] == 0)
-		{
-			fprintf(fp, "0\n");
-		}
-		else
-		{
-			fprintf(fp, "%d\n", dia_ver3[stage][i]);
-		}
+		fwrite(&dia_ver3[stage][i], sizeof(UINT16), 1, fp);
 	}
 	for (i = 0; i < 243; i++)
 	{
-		if (dia_ver4[stage][i] == 0)
-		{
-			fprintf(fp, "0\n");
-		}
-		else
-		{
-			fprintf(fp, "%d\n", dia_ver4[stage][i]);
-		}
+		fwrite(&dia_ver4[stage][i], sizeof(UINT16), 1, fp);
 	}
 
 	for (i = 0; i < 59049; i++)
 	{
-		if (edge[stage][i] == 0)
-		{
-			fprintf(fp, "0\n");
-		}
-		else
-		{
-			fprintf(fp, "%d\n", edge[stage][i]);
-		}
+		fwrite(&edge[stage][i], sizeof(UINT16), 1, fp);
 	}
 
 	for (i = 0; i < 59049; i++)
 	{
-		if (corner5_2[stage][i] == 0)
-		{
-			fprintf(fp, "0\n");
-		}
-		else
-		{
-			fprintf(fp, "%d\n", corner5_2[stage][i]);
-		}
+		fwrite(&corner5_2[stage][i], sizeof(UINT16), 1, fp);
 	}
 	for (i = 0; i < 19683; i++)
 	{
-		if (corner3_3[stage][i] == 0)
-		{
-			fprintf(fp, "0\n");
-		}
-		else
-		{
-			fprintf(fp, "%d\n", corner3_3[stage][i]);
-		}
+		fwrite(&corner3_3[stage][i], sizeof(UINT16), 1, fp);
 	}
 	for (i = 0; i < 59049; i++)
 	{
-		if (triangle[stage][i] == 0)
-		{
-			fprintf(fp, "0\n");
-		}
-		else
-		{
-			fprintf(fp, "%d\n", triangle[stage][i]);
-		}
+		fwrite(&triangle[stage][i], sizeof(UINT16), 1, fp);
 	}
 
 #if 0
@@ -207,7 +124,7 @@ void Eval_Write(char *filename, int stage)
 		}
 	}
 #endif
-	fprintf(fp, "%d\n", constant);
+	fwrite(&constant, sizeof(UINT16), 1, fp);
 
 	fclose(fp);
 }
@@ -218,73 +135,62 @@ int read_table(char *filename, int stage)
 	FILE *fp;
 	char str[32];
 
-	strcpy_s(str, filename);
+	strcpy_s(str, sizeof(str), filename);
 
-	if (fopen_s(&fp, str, "r") != 0){
+	if (fopen_s(&fp, str, "rb") != 0){
 		char msg[48];
 		printf(msg, "%s を開けません。", filename);
 		return -1;
 	}
 
 	int i;
-	char buf[LEN];
 	for (i = 0; i < 6561; i++)
 	{
-		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%d", &hori_ver1[stage][i]);
+		if (fread(&hori_ver1[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
 	}
 	for (i = 0; i < 6561; i++)
 	{
-		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%d", &hori_ver2[stage][i]);
+		if (fread(&hori_ver2[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
 	}
 	for (i = 0; i < 6561; i++)
 	{
-		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%d", &hori_ver3[stage][i]);
+		if (fread(&hori_ver3[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
 	}
 	for (i = 0; i < 6561; i++)
 	{
-		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%d", &dia_ver1[stage][i]);
+		if (fread(&dia_ver1[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
 	}
 	for (i = 0; i < 2187; i++)
 	{
-		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%d", &dia_ver2[stage][i]);
+		if (fread(&dia_ver2[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
 	}
 	for (i = 0; i < 729; i++)
 	{
-		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%d", &dia_ver3[stage][i]);
+		if (fread(&dia_ver3[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
 	}
 	for (i = 0; i < 243; i++)
 	{
-		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%d", &dia_ver4[stage][i]);
+		if (fread(&dia_ver4[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
 	}
 
 	for (i = 0; i < 59049; i++)
 	{
-		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%d", &edge[stage][i]);
+		if (fread(&edge[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
 	}
 
 	for (i = 0; i < 59049; i++)
 	{
-		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%d", &corner5_2[stage][i]);
+		if (fread(&corner5_2[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
 	}
 	for (i = 0; i < 19683; i++)
 	{
-		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%d", &corner3_3[stage][i]);
+		if (fread(&corner3_3[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
 	}
 	for (i = 0; i < 59049; i++)
 	{
-		fgets(buf, LEN, fp);
-		sscanf_s(buf, "%d", &triangle[stage][i]);
+		if (fread(&triangle[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
 	}
+
 #if 0
 	for (i = 0; i < MOBILITY_NUM; i++)
 	{
@@ -299,12 +205,12 @@ int read_table(char *filename, int stage)
 	}
 #endif
 
-	fgets(buf, LEN, fp);
-	sscanf_s(buf, "%d", &constant);
+	if (fread(&constant, sizeof(INT16), 1, fp) != 1) return -1;
 
-	if (fgets(buf, LEN, fp) != NULL)
+	if(fread(&constant, sizeof(INT16), 1, fp) != 0) 
 	{
-		printf("DATA ERROR!!!\n");
+		printf("data error!!\n");
+		return -1;
 	}
 
 	fclose(fp);
@@ -369,7 +275,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	for (int count = 0; count < STAGE_NUM; count++){
 
-		sprintf_s(filename, "table\\%d.dat", count);
+		sprintf_s(filename, sizeof(filename), "table\\%d.dat", count);
 
 		if (read_table(filename, 1) == -1)
 		{
@@ -842,7 +748,7 @@ int _tmain(int argc, _TCHAR* argv[])
 #endif
 		end_t = clock();
 
-		sprintf_s(filename, "table\\new\\%d.dat", count);
+		sprintf_s(filename, sizeof(filename), "table\\new\\%d.dat", count);
 		Eval_Write(filename, 1);
 
 		printf("\n正規化を完了しました！\n");
@@ -852,6 +758,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	printf("\n評価テーブルを作成しています...\n");
 	makeData();
+
 	printf("\n評価テーブルを作成しました！\n");
 
 	return 0;

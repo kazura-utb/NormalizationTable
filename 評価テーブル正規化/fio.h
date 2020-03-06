@@ -21,4 +21,4 @@ typedef struct{
 	int right;
 }TreeNode;
 
-void makeData();
+BOOL makeData();

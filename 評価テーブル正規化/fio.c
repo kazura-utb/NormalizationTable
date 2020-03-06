@@ -7,6 +7,7 @@
 #include "stdafx.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "zlib.h"
 
 //#include "cpu.h"
 #include "fio.h"
@@ -21,7 +22,19 @@
 
 #define NODE_SIZE 256
 
-char g_fileBuffer[8192];
+#define EVAL_N             226234
+#define EVAL_FEATURE_SIZE (EVAL_N * sizeof(INT16))
+
+typedef struct
+{
+	UINT32 size;
+	UINT32 decompSize;
+	UINT8  compData[512 * 1024];
+} st_eval_data;
+
+st_eval_data g_evalData;
+
+UINT8 g_outBuf[1024 * 512];
 
 char charSet[] = "0123456789abcdefgh\n.-;";
 
@@ -75,7 +88,6 @@ int CreateHuffmanTree(TreeNode *nodes, int nodeNum)
 }
 
 /* C#版では使う事がない */
-#if 1
 int writeEncodeData(UCHAR *encodeData, TreeNode *nodes, int root,
 	CodeInfo *codeInfo, UCHAR *data, int dataLen){
 
@@ -176,82 +188,141 @@ int encode(UCHAR *encodeData, CodeInfo *codeInfo, UCHAR *data, int dataLen) {
 }
 
 
+BOOL do_compress(FILE *fp, UINT8 *compData, UINT32 *compDataSize, UINT32 *fileSize)
+{
+	INT32     count, flush, status;
+	UINT8    *inBuf;
+	UINT32    inSize;
+	z_stream  z;
+
+	/* すべてのメモリ管理をライブラリに任せる */
+	z.zalloc = Z_NULL;
+	z.zfree = Z_NULL;
+	z.opaque = Z_NULL;
+
+	/* 初期化 */
+	/* 第2引数は圧縮の度合。0～9 の範囲の整数で，0 は無圧縮 */
+	/* Z_DEFAULT_COMPRESSION (= 6) が標準 */
+	if (deflateInit(&z, Z_DEFAULT_COMPRESSION) != Z_OK) {
+		printf("deflateInit: %s\n", (z.msg) ? z.msg : "???");
+		return FALSE;
+	}
+
+	/* 通常は deflate() の第2引数は Z_NO_FLUSH にして呼び出す */
+	z.avail_in = 0;
+	z.next_out = g_outBuf; /* 出力バッファ残量を元に戻す */
+	z.avail_out = sizeof(g_outBuf); /* 出力ポインタを元に戻す */
+	flush = Z_NO_FLUSH;
+
+	inSize = 1024 * 512;
+	inBuf = (UCHAR *)malloc(inSize);
+
+	status = Z_OK;
+	while (status == Z_OK)
+	{
+		if (z.avail_in == 0)
+		{  /* 入力が尽きれば */
+			z.next_in = inBuf;  /* 入力ポインタを入力バッファの先頭に */
+			z.avail_in = fread(&inBuf[4], 1, inSize, fp); /* データを読み込む */
+			if(z.avail_in != 0)
+			{
+				inBuf[0] = (UCHAR)(z.avail_in >> 24);
+				inBuf[1] = (UCHAR)(z.avail_in >> 16);
+				inBuf[2] = (UCHAR)(z.avail_in >> 8);
+				inBuf[3] = (UCHAR)z.avail_in;
+				z.avail_in += 4;
+				*fileSize = z.avail_in;
+			}
+			if (z.avail_in < inSize) flush = Z_FINISH;
+		}
+		do
+		{
+			status = deflate(&z, flush); /* 圧縮する */
+			if (status == Z_STREAM_END) break; /* 完了 */
+			if (status != Z_OK)
+			{   /* エラー */
+				printf("deflate: %s\n", (z.msg) ? z.msg : "???");
+				break;
+			}
+		} while (status == Z_OK && z.avail_in > 0);
+		
+	}
+
+	if ((count = sizeof(g_outBuf) - z.avail_out) != 0)
+	{
+		memcpy_s(compData, *compDataSize, g_outBuf, count);
+		*compDataSize = count;
+	}
+
+	free(inBuf);
+
+	if (deflateEnd(&z) != Z_OK) {
+		printf("inflateEnd: %s\n", (z.msg) ? z.msg : "???");
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+
+UINT32 marshalEvalData(st_eval_data *evalData, UINT8 *outBuf, UINT32 outBufSize)
+{
+	UINT32 cnt;
+
+	cnt = 0;
+
+	outBuf[cnt++] = (UINT8)(evalData->size >> 24);
+	outBuf[cnt++] = (UINT8)(evalData->size >> 16);
+	outBuf[cnt++] = (UINT8)(evalData->size >> 8);
+	outBuf[cnt++] = (UINT8 )evalData->size;
+
+	outBuf[cnt++] = (UINT8)(evalData->decompSize >> 24);
+	outBuf[cnt++] = (UINT8)(evalData->decompSize >> 16);
+	outBuf[cnt++] = (UINT8)(evalData->decompSize >> 8);
+	outBuf[cnt++] = (UINT8)evalData->decompSize;
+
+	memcpy_s(&outBuf[cnt], outBufSize - cnt, evalData->compData, evalData->size);
+	cnt += evalData->size;
+
+	return cnt;
+}
+
 
 // Asciiデータからテーブル作成を行う時のみ使用する
-void makeData()
+BOOL makeData()
 {
+	FILE     *fp, *wfp;
+	char     filePath[64];
+	BOOL     ret;
+	UINT32   fileSize;
 
-	FILE *fp, *wfp1, *wfp2;
-	char filePath[64], lenData[4];
-	int readSize, encodeDataLen;
-
-	UCHAR *data = (UCHAR *)malloc(18160640); // 17735KB
-
-	//if (fopen_s(&wfp1, "src\\books.bin", "wb") != 0) {
-	//	exit(1);
-	//}
-
-	if (fopen_s(&wfp2, "table\\new\\eval.bin", "wb") != 0) {
+	if (fopen_s(&wfp, "table\\new\\eval.bin", "wb") != 0) {
 		exit(1);
 	}
 
-	CodeInfo codeInfo[22];
-	UCHAR *encodeData = (UCHAR *)malloc(10485760); // 17735KB
+#if 1
 
-	for (int i = 0; i < 61; i++) {
-
-		if (i == -1) {
-			if (fopen_s(&fp, "table\\new\\books.dat", "r") != 0) {
-				exit(1);
-			}
-		}
-		else {
-			sprintf_s(filePath, "table\\new\\%d.dat", i);
-			if (fopen_s(&fp, filePath, "r") != 0) {
-				exit(1);
-			}
+	for (int i = 0; i < 61; i++)
+	{
+		sprintf_s(filePath, sizeof(filePath), "table\\new\\%d.dat", i);
+		if (fopen_s(&fp, filePath, "rb") != 0) {
+			break;
 		}
 
-		setvbuf(fp, g_fileBuffer, _IOFBF, 16384);
-		readSize = fread(data, sizeof(UCHAR), 18160640, fp);
+		g_evalData.size = sizeof(g_evalData.compData);
+		ret = do_compress(fp, g_evalData.compData, &g_evalData.size, &g_evalData.decompSize);
+		if (ret == FALSE) break;
 
-		memset(codeInfo, 0, sizeof(CodeInfo));
-		encodeDataLen = encode(encodeData, codeInfo, data, readSize);
-
-		if (encodeDataLen == -1) {
-			return;
-		}
-
-		lenData[0] = (readSize & 0xFF000000) >> 24;
-		lenData[1] = (readSize & 0xFF0000) >> 16;
-		lenData[2] = (readSize & 0xFF00) >> 8;
-		lenData[3] = (readSize & 0xFF);
-		if (i == -1) {
-			fwrite(lenData, sizeof(UCHAR), sizeof(lenData), wfp1);
-			lenData[0] = (encodeDataLen & 0xFF000000) >> 24;
-			lenData[1] = (encodeDataLen & 0xFF0000) >> 16;
-			lenData[2] = (encodeDataLen & 0xFF00) >> 8;
-			lenData[3] = (encodeDataLen & 0xFF);
-			fwrite(lenData, sizeof(UCHAR), sizeof(lenData), wfp1);
-			fwrite(encodeData, sizeof(UCHAR), encodeDataLen, wfp1);
-			fclose(wfp1);
-		}
-		else {
-			fwrite(lenData, sizeof(UCHAR), sizeof(lenData), wfp2);
-			lenData[0] = (encodeDataLen & 0xFF000000) >> 24;
-			lenData[1] = (encodeDataLen & 0xFF0000) >> 16;
-			lenData[2] = (encodeDataLen & 0xFF00) >> 8;
-			lenData[3] = (encodeDataLen & 0xFF);
-			fwrite(lenData, sizeof(UCHAR), sizeof(lenData), wfp2);
-			fwrite(encodeData, sizeof(UCHAR), encodeDataLen, wfp2);
-		}
+		fileSize = marshalEvalData(&g_evalData, g_outBuf, sizeof(g_outBuf));
+		fwrite(&fileSize, sizeof(UINT8), 4, wfp);
+		fwrite(g_outBuf, sizeof(UINT8), fileSize, wfp);
 
 		fclose(fp);
 	}
 
-	free(data);
-	free(encodeData);
-	fclose(wfp2);
+	fclose(wfp);
+
+	return TRUE;
 }
 
 #endif
