@@ -146,49 +146,61 @@ int read_table(char *filename, int stage)
 	int i;
 	for (i = 0; i < 6561; i++)
 	{
-		if (fread(&hori_ver1[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
+		fgets(str, sizeof(str), fp);
+		sscanf_s(str, "%hd", &hori_ver1[stage][i]);
+		//if (fread(&hori_ver1[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
 	}
 	for (i = 0; i < 6561; i++)
 	{
-		if (fread(&hori_ver2[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
+		fgets(str, sizeof(str), fp);
+		sscanf_s(str, "%hd", &hori_ver2[stage][i]);
 	}
 	for (i = 0; i < 6561; i++)
 	{
-		if (fread(&hori_ver3[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
+		fgets(str, sizeof(str), fp);
+		sscanf_s(str, "%hd", &hori_ver3[stage][i]);
 	}
 	for (i = 0; i < 6561; i++)
 	{
-		if (fread(&dia_ver1[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
+		fgets(str, sizeof(str), fp);
+		sscanf_s(str, "%hd", &dia_ver1[stage][i]);
 	}
 	for (i = 0; i < 2187; i++)
 	{
-		if (fread(&dia_ver2[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
+		fgets(str, sizeof(str), fp);
+		sscanf_s(str, "%hd", &dia_ver2[stage][i]);
 	}
 	for (i = 0; i < 729; i++)
 	{
-		if (fread(&dia_ver3[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
+		fgets(str, sizeof(str), fp);
+		sscanf_s(str, "%hd", &dia_ver3[stage][i]);
 	}
 	for (i = 0; i < 243; i++)
 	{
-		if (fread(&dia_ver4[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
+		fgets(str, sizeof(str), fp);
+		sscanf_s(str, "%hd", &dia_ver4[stage][i]);
 	}
 
 	for (i = 0; i < 59049; i++)
 	{
-		if (fread(&edge[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
+		fgets(str, sizeof(str), fp);
+		sscanf_s(str, "%hd", &edge[stage][i]);
 	}
 
 	for (i = 0; i < 59049; i++)
 	{
-		if (fread(&corner5_2[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
+		fgets(str, sizeof(str), fp);
+		sscanf_s(str, "%hd", &corner5_2[stage][i]);
 	}
 	for (i = 0; i < 19683; i++)
 	{
-		if (fread(&corner3_3[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
+		fgets(str, sizeof(str), fp);
+		sscanf_s(str, "%hd", &corner3_3[stage][i]);
 	}
 	for (i = 0; i < 59049; i++)
 	{
-		if (fread(&triangle[stage][i], sizeof(INT16), 1, fp) != 1) return -1;
+		fgets(str, sizeof(str), fp);
+		sscanf_s(str, "%hd", &triangle[stage][i]);
 	}
 
 #if 0
@@ -205,7 +217,8 @@ int read_table(char *filename, int stage)
 	}
 #endif
 
-	if (fread(&constant, sizeof(INT16), 1, fp) != 1) return -1;
+	fgets(str, sizeof(str), fp);
+	sscanf_s(str, "%hd", &constant);
 
 	if(fread(&constant, sizeof(INT16), 1, fp) != 0) 
 	{
@@ -275,7 +288,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	for (int count = 0; count < STAGE_NUM; count++){
 
-		sprintf_s(filename, sizeof(filename), "table\\%d.dat", count);
+		sprintf_s(filename, sizeof(filename), "table\\%d.txt", count);
 
 		if (read_table(filename, 1) == -1)
 		{
